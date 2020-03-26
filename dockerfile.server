@@ -1,0 +1,4 @@
+FROM ibmcom/mq
+USER root
+RUN useradd alice -G mqm && echo alice:pass | chpasswd
+USER mqm
