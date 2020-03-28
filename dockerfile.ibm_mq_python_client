@@ -1,0 +1,96 @@
+###
+### Reworked docker image from https://developer.ibm.com/answers/questions/488740/running-mqclient-pymqi-in-docker/
+###
+
+FROM richarddally/ubuntu_generic_python3:3.8.2
+
+MAINTAINER r.dally@protonmail.com
+
+# Download and extract the MQ installation files
+ARG DIR_EXTRACT=/tmp/mq
+
+# The URL to download the MQ installer from in tar.gz format
+ARG MQ_URL=https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqadv/mqadv_dev914_ubuntu_x86-64.tar.gz
+
+RUN echo $MQ_URL
+RUN mkdir -p $DIR_EXTRACT && cd $DIR_EXTRACT
+
+RUN wget --quiet $MQ_URL
+RUN tar --ungzip --extract --file mqadv_dev914_ubuntu_x86-64.tar.gz --directory $DIR_EXTRACT
+
+# Recommended: Remove packages only needed by this script
+RUN apt-get purge -y ca-certificates curl
+
+# Recommended: Remove any orphaned packages
+RUN apt-get autoremove -y --purge
+
+# Recommended: Create the mqm user ID with a fixed UID and group, so that the file permissions work between different images
+RUN groupadd --system --gid 999 mqm
+RUN useradd --system --uid 999 --gid mqm mqm
+RUN usermod -G mqm root
+
+# The MQ packages to install
+ARG MQ_PACKAGES="ibmmq-client ibmmq-sdk ibmmq-runtime"
+
+# Find directory containing .deb files
+ARG DIR_DEB=${DIR_EXTRACT}/MQServer
+
+# Find location of mqlicense.sh
+ARG MQLICENSE=${DIR_EXTRACT}/MQServer/mqlicense.sh
+
+# Accept the MQ license
+RUN ${MQLICENSE} -text_only -accept
+
+RUN echo "deb [trusted=yes] file:${DIR_DEB} ./" > /etc/apt/sources.list.d/IBM_MQ.list
+
+# Install MQ using the DEB packages
+RUN apt-get update
+RUN apt-get install -y $MQ_PACKAGES
+
+# Remove 32-bit libraries from 64-bit container
+RUN find /opt/mqm /var/mqm -type f -exec file {} \; | awk -F: '/ELF 32-bit/{print $1}' | xargs --no-run-if-empty rm -f
+
+# Remove tar.gz files unpacked by RPM postinst scripts
+RUN find /opt/mqm -name '*.tar.gz' -delete
+
+# Recommended: Set the default MQ installation (makes the MQ commands available on the PATH)
+RUN /opt/mqm/bin/setmqinst -p /opt/mqm -i
+
+# Clean up all the downloaded files
+RUN rm -f /etc/apt/sources.list.d/IBM_MQ.list
+
+RUN rm -rf ${DIR_EXTRACT}
+
+# Apply any bug fixes not included in base Ubuntu or MQ image.
+
+# Don't upgrade everything based on Docker best practices https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#run
+RUN apt-get upgrade -y sensible-utils
+
+# End of bug fixes
+RUN rm -rf /var/lib/apt/lists/*
+
+# Optional: Update the command prompt with the MQ version
+RUN echo "mq:$(dspmqver -b -f 2)" > /etc/debian_chroot && rm -rf /var/mqm
+
+ENV LANG=en_US.UTF-8
+
+RUN export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/mqm/lib64/
+
+# Support the latest functional cmdlevel by default
+ENV MQ_QMGR_CMDLEVEL=802
+
+# Always put the MQ data directory in a Docker volume
+VOLUME /var/mqm
+RUN chmod +x /var/mqm
+
+RUN mkdir -p /app
+
+WORKDIR /app
+
+# Install requirements
+ADD requirements.txt /app
+RUN python3 -m pip install -r requirements.txt
+
+ADD mqclient.py /app
+
+ENTRYPOINT ["python3", "/app/mqclient.py"]

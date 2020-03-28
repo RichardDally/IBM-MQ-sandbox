@@ -1,6 +1,16 @@
 # IBM-MQ-sandbox
 
-- How to start server `start_server.sh`
+- How to build containers
+   - `build_client.sh`
+   - `build_python3.sh`
+   - `build_server.sh`
+
+- How to publish to Docker Hub
+   - Select the right image to tag `docker images`
+   - Tag image `docker tag <IMAGE ID> richarddally/ubuntu_generic_python3:3.8.2`
+   - Publish `docker push richarddally/ubuntu_generic_python3`
+
+- How to start IBM MQ Server within Docker `start_server.sh`
 
 - How to access server command line directly from live container:
    - Grab container id with `docker ps`
@@ -10,6 +20,9 @@
        - Display your running queue managers `dspmq`
        - Display rights `dmpmqaut`
             - Example: `dspmqaut -m QM1 -t qmgr -p admin`
+
+- How to debug your container from bash within:
+   - `docker run -it --entrypoint /bin/bash richarddally/ibmmqclient:latest -s`
 
 - How to connect to web console:
    - url: https://localhost:9443/ibmmq/console/

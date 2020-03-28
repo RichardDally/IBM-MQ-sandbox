@@ -1,1 +1,0 @@
-docker build -f dockerfile.server -t richarddally/ibmmqclient:latest .
