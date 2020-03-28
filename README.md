@@ -1,9 +1,9 @@
 # IBM-MQ-sandbox
 
 - How to build containers
-   - `build_client.sh`
-   - `build_python3.sh`
-   - `build_server.sh`
+   - `build_ibm_mq_server.sh` image tweaked from official IBM MQ Server (to add additional user)
+   - `build_ibm_mq_python_client.sh` image containing custom CPython + Ubuntu + IBM MQ client libraries
+   - `build_ubuntu_generic_python.sh` image containing Ubuntu + custom CPython (3.8.2 by default)
 
 - How to publish to Docker Hub
    - Select the right image to tag `docker images`
