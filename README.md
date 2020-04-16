@@ -2,7 +2,7 @@
 
 - How to build containers
    - `build_ibm_mq_server.sh` image tweaked from official IBM MQ Server (to add additional user)
-   - `build_ibm_mq_client.sh` image based on pymqi
+   - `build_ibm_mq_client.sh` image based on [pymqi](https://github.com/RichardDally/pymqi)
 
 - How to publish to Docker Hub
    - Select the right image to tag `docker images`
