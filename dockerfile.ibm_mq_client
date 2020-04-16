@@ -1,0 +1,15 @@
+FROM richarddally/pymqi
+
+MAINTAINER r.dally@protonmail.com
+
+RUN mkdir -p /app
+
+WORKDIR /app
+
+# Install requirements
+ADD requirements.txt /app
+RUN python3 -m pip install -r requirements.txt
+
+ADD mqclient.py /app
+
+ENTRYPOINT ["python3", "/app/mqclient.py"]

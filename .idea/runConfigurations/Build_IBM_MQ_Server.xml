@@ -1,14 +1,13 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Build IBM MQ Server" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
+  <configuration default="false" name="Build IBM MQ Server" type="docker-deploy" factoryName="dockerfile" server-name="Laptop Docker">
     <deployment type="dockerfile">
       <settings>
         <option name="buildCliOptions" value="" />
-        <option name="buildOnly" value="true" />
         <option name="command" value="" />
-        <option name="containerName" value="" />
+        <option name="containerName" value="IBM_MQ_SERVER" />
         <option name="entrypoint" value="" />
         <option name="imageTag" value="richarddally/ibm_mq_server:latest" />
-        <option name="commandLineOptions" value="" />
+        <option name="commandLineOptions" value="--env LICENSE=accept --env MQ_QMGR_NAME=QM1 --network mq-demo-network --network-alias qmgr --publish 1414:1414 --publish 9443:9443" />
         <option name="sourceFilePath" value="dockerfile.ibm_mq_server" />
       </settings>
     </deployment>
