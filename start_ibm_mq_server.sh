@@ -5,7 +5,7 @@ docker run \
   --network-alias qmgr \
   --publish 1414:1414 \
   --publish 9443:9443 \
-  richarddally/ibmmqserver:latest
+  richarddally/ibm_mq_server:latest
 
 
 # ibmcom/mq
